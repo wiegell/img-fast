@@ -2,9 +2,15 @@
   "name": "img-fast",
   "version": "0.1.0",
   "description": "non-REST loader",
-  "main": "index.js",
+  "main": "dist/index",
+  "types": "dist/index.d.ts",
   "scripts": {
-
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "npm run type-check -- --watch",
+    "build": "webpack",
+    "build:types": "tsc",
+    "build:js": "webpack",
+    "start:dev": "webpack-dev-server"
   },
   "repository": {
     "type": "git",
@@ -17,8 +23,15 @@
   },
   "homepage": "https://github.com/wiegell/img-fast#readme",
   "dependencies": {
-    "browserify": "^16.5.1",
-    "ts-exif-parser": "^0.1.5",
-    "typescript": "^3.8.3"
-  }
+    "@types/node": "^13.11.1",
+    "ts-exif-parser": "^0.1.5"
+  },
+  "devDependencies": {
+    "ts-loader": "^7.0.0",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  },
+  "type": "commonjs"
 }
