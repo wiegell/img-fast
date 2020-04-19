@@ -37,4 +37,4 @@ export function isConfigType(providedConfig: any): providedConfig is Partial<con
 }
 
 //Events
-export const exist = createEventDefinition<{ greeting: number }>()("SOME_EVENT");
+export const exist = createEventDefinition<{ greeting: string }>()("SOME_EVENT");
