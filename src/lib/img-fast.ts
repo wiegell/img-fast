@@ -21,6 +21,7 @@ export class ImgFast extends HTMLElement {
     bus.subscribe(exist, (event) => {
       console.log("Created! " + event.payload.greeting);
     });
+    let gittest = 0;
 
     //Publish creation
     bus.publish(
