@@ -11,6 +11,14 @@ module.exports = {
         use: 'ts-loader',
         exclude: /node_modules/,
       },
+      {
+        test: /\.css$/i,
+        use: ['css-loader'],
+      },
+      {
+        test: /\.html$/i,
+        loader: 'html-loader',
+      },
     ],
   },
   resolve: {
@@ -30,5 +38,5 @@ module.exports = {
   optimization: {
     minimize: true
   },
-  // plugins: [new HtmlWebpackPlugin()]
+  plugins: [new HtmlWebpackPlugin()]
 };
