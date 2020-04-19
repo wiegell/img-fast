@@ -1,0 +1,28 @@
+img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+}
+
+.container {
+    width: 100%;
+    background-color: rgba(100, 100, 100, 0.5);
+}
+
+#ratio_keeper {
+    height: 0;
+    width: 100%;
+    padding: 122% 0 0 0;
+    background-color: rgba(100, 100, 100, 0.5);
+    position: relative;
+}
+
+#svgContainer {
+    width: 100px;
+    position: absolute;
+    top: calc(50% - 50px);
+    left: calc(50% - 50px);
+    z-index: 0;
+}
