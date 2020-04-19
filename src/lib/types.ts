@@ -1,5 +1,4 @@
-
-
+import { createEventDefinition } from "ts-bus";
 // export type Partial<configType> = { [P in keyof configType]?: configType[P] };
 
 export const defaultConfig = {
@@ -11,6 +10,8 @@ export const defaultConfig = {
 
 export type configType = typeof defaultConfig
 type configFieldNames = keyof configType;
+
+//Type guards
 
 export function isConfigType(providedConfig: any): providedConfig is Partial<configType> {
     for (const key1 in providedConfig) {
@@ -34,3 +35,6 @@ export function isConfigType(providedConfig: any): providedConfig is Partial<con
     }
     return true
 }
+
+//Events
+export const exist = createEventDefinition<{ greeting: number }>()("SOME_EVENT");

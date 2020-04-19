@@ -8,6 +8,6 @@ export function EventBusSetup() {
         console.error('Bus already defined - double import?');
     } else {
         console.log('Defining local event bus');
-        bus = new EventBus()
+        bus = new EventBus();
     }
 }
