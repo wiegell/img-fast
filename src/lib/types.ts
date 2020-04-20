@@ -1,7 +1,7 @@
 // export type Partial<configType> = { [P in keyof configType]?: configType[P] };
 import { BehaviorSubject, Observable, Subject } from "rxjs";
-import { map, filter, publish, share } from "rxjs/operators"
-import { mergeWithExistingElementMap } from './stateKeeper'
+import { map, filter, publish, share } from "rxjs/operators";
+import { mergeWithExistingElementMap } from "./stateKeeper";
 
 export const defaultConfig = {
   expectedJPG: true,
@@ -71,47 +71,7 @@ export type elementStatusType = {
 
 export type collectedStatusType = {
   //Map key is id
-  statusMap?: Map<number, elementStatusType>,
-  newElementRegistered: boolean,
-  updatedOrCreatedId: number,
-}
-
-//Subjects
-export class globalContainer {
-
-  //Variables
-  private idCounter: number;
-
-  //Subjects
-  public statusInput: Subject<elementStatusType>;
-
-  //Observables
-  public $statusKeeper: Observable<collectedStatusType>;
-  public $newElement: Observable<elementStatusType>;
-
-  //Functions
-  public getUniqueID = () => {
-    this.idCounter++
-    return this.idCounter
-  }
-
-  constructor() {
-    //Variables
-    this.idCounter = -1;
-
-    //Subjects
-    this.statusInput = new Subject<elementStatusType>();
-
-    //Observables
-    this.$statusKeeper = this.statusInput.asObservable().pipe(
-      mergeWithExistingElementMap()
-    )
-    this.$newElement = this.$statusKeeper.pipe(
-      filter(val => val.newElementRegistered),
-      map(input => {
-        return input.statusMap[input.updatedOrCreatedId]
-      }),
-      share()
-    )
-  }
+  statusMap?: Map<number, elementStatusType>;
+  newElementRegistered: boolean;
+  updatedOrCreatedId: number;
 };
