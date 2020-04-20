@@ -1,25 +1,34 @@
+// import { EventBusSetup, bus } from './lib/EventBusSetup';
+// import { EventBus } from "ts-bus";
+import { ImgFast } from "./lib/img-fast";
+import { globalObservableContainer, globalSubjectContainer } from "./lib/types";
+import { BehaviorSubject, Subject } from "rxjs";
+import { sequenceEqual, map } from "rxjs/operators";
 
-import { EventBusSetup, bus } from './lib/EventBusSetup';
-import { EventBus } from "ts-bus";
-import { ImgFast } from './lib/img-fast'
-
-
-//Check that bus not instantiated from elsewhere, and then declare globaly
-EventBusSetup();
 declare global {
-    interface Window {
-        eBus: EventBus;
-    }
+  interface Window {
+    imgFastGlobalSubjects: globalSubjectContainer;
+    imgFastGlobalObservables: globalObservableContainer;
+  }
 }
-if (window.eBus instanceof EventBus) {
-    console.warn('EventBus already defined - intentional?');
-} else if (window.eBus !== undefined) {
-    console.error('EventBus (global var \'eBus\') already defined, but not of type EventBus');
+if (
+  window.imgFastGlobalSubjects !== undefined ||
+  window.imgFastGlobalObservables !== undefined
+) {
+  console.warn("imgFastGlobal already defined");
 } else {
-    console.log('Defining global event bus');
-    window.eBus = bus;
+  console.log("Defining global behaviorSubject");
+  window.imgFastGlobalSubjects = {
+    howManyFastImg: new BehaviorSubject<number>(0),
+    smallRangeLoaded: new Subject<boolean>(),
+  };
+  window.imgFastGlobalObservables = {
+    areAllSmallRangesLoaded: window.imgFastGlobalSubjects.smallRangeLoaded.asObservable().pipe(
+      sequenceEqual(window.imgFastGlobalSubjects.howManyFastImg.asObservable(), )
+      map((inputArray) => true)
+    ),
+  };
 }
 
 // export ImgFast?
-customElements.define('img-fast', ImgFast);
-
+customElements.define("img-fast", ImgFast);

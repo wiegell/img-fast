@@ -1,4 +1,4 @@
-import { ExifParserFactory, ExifData } from 'ts-exif-parser';
+import { ExifData } from 'ts-exif-parser';
 
 
 export class Loader {

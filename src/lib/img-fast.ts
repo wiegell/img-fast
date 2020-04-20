@@ -1,7 +1,6 @@
 import { ExifParserFactory, ExifData } from "ts-exif-parser";
 import { ExifParser } from "ts-exif-parser/lib/ExifParser";
-import { configType, defaultConfig, isConfigType, exist } from "./types";
-import { bus } from "./EventBusSetup";
+import { configType, defaultConfig, isConfigType } from "./types";
 import { Loader } from "./Loader";
 const css = "<style>" + require("../styles/main.css") + "</style>";
 const template: string = require("../templates/component.html");
@@ -10,25 +9,21 @@ export class ImgFast extends HTMLElement {
   // private parser: ExifParser | undefined;
   private data: ExifData | undefined;
   private parser: ExifParser | undefined;
+  private subj = window.imgFastGlobalSubjects;
+  private obs = window.imgFastGlobalObservables;
 
   constructor() {
     super();
     // Attach a shadow root to the element.
     let shadowRoot = this.attachShadow({ mode: "open" });
-    let isFirstInstance = true;
 
-    //Listen for other creates
-    bus.subscribe(exist, (event) => {
-      console.log("Created! " + event.payload.greeting);
+    //Subscribe to global subject
+    this.obs.areSVGsRendered.subscribe((input) => {
+      console.log("yey! ");
     });
-    let gittest = 0;
 
-    //Publish creation
-    bus.publish(
-      exist({
-        greeting: "hello",
-      })
-    );
+    //Register this component
+    this.subj.howManyFastImg.next(this.subj.howManyFastImg.value + 1);
 
     //setup configuration
     let providedConfig: Partial<configType>;
@@ -49,12 +44,13 @@ export class ImgFast extends HTMLElement {
     //Create svg-loaders
     let shadowTmpContainer = document.createElement("div");
     shadowRoot.innerHTML = css + template;
+    this.subj.SVGRender.next(true);
 
     let loader = new Loader(this.src + "?" + Math.round(Math.random() * 100));
     //Process onload
     loader.getHTTPonLoadPromise().then((result: ArrayBuffer) => {
       //Do parsing
-      this.parser = ExifParserFactory.create(Buffer.from(result));
+      this.parser = ExifParserFactory.create(result);
       this.data = this.parser.parse();
       if (this.data.hasThumbnail("image/jpeg")) {
         // console.log(srcArray[i].substr(srcArray[i].length - 10));
