@@ -21,14 +21,14 @@ export class ImgFast extends HTMLElement {
     // Attach a shadow root to the element.
     let shadowRoot = this.attachShadow({ mode: "open" });
 
-    //Subscribe to global subject
+    // Subscribe to global subject
     // this.obs.areSVGsRendered.subscribe((input) => {
     //   console.log("yey! ");
     // });
 
     //Register this component
     this.glob.$newElement.subscribe(() => {
-
+      console.log('yay new element');
     })
     this.glob.statusInput.next(this.status)
 
