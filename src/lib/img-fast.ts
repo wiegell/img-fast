@@ -21,6 +21,7 @@ export class ImgFast extends HTMLElement {
   private status: elementStatusType = {
     id: this.glob.getUniqueID(),
     dlStatus: dlStatusEnum.Stopped,
+    isInViewport: false,
   };
   private downloadSubscription: Subscription;
 
@@ -36,7 +37,10 @@ export class ImgFast extends HTMLElement {
 
     //Subscriptions
     this.downloadSubscription = this.glob.$dlDictator.subscribe((input) => {
-      if (input.ids.includes(this.status.id) && input.dlCommand == dlStatusEnum.FetchFewKB) {
+      if (
+        input.ids.includes(this.status.id) &&
+        input.dlCommand == dlStatusEnum.FetchFewKB
+      ) {
         //HTTP-setup
         let loader = new Loader(
           this.src + "?" + Math.round(Math.random() * 100)

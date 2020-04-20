@@ -61,7 +61,7 @@ export enum fileType {
 
 export type elementStatusType = {
   id: number;
-  isInViewport?: boolean;
+  isInViewport: boolean;
   dlStatus: dlStatusEnum;
   expectedFileType?: fileType;
   actualFileType?: fileType;
@@ -70,8 +70,9 @@ export type elementStatusType = {
 };
 
 export type collectedStatusType = {
+  updatedOrCreatedId: number;
   //Map key is id
   statusMap?: Map<number, elementStatusType>;
   newElementRegistered: boolean;
-  updatedOrCreatedId: number;
+  newElementInViewport: boolean;
 };
