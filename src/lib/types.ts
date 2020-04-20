@@ -1,5 +1,7 @@
 // export type Partial<configType> = { [P in keyof configType]?: configType[P] };
 import { BehaviorSubject, Observable, Subject } from "rxjs";
+import { map, filter, publish, share } from "rxjs/operators"
+import { mergeWithExistingElementMap } from './stateKeeper'
 
 export const defaultConfig = {
   expectedJPG: true,
@@ -44,6 +46,7 @@ export function isConfigType(
 }
 
 export enum dlStatusEnum {
+  Stopped,
   FetchFewKB,
   FetchMoreKB,
   FullDownload,
@@ -56,7 +59,8 @@ export enum fileType {
   unsupported,
 }
 
-export type statusType = {
+export type elementStatusType = {
+  id: number;
   dlStatus: dlStatusEnum;
   expectedFileType?: fileType;
   actualFileType?: fileType;
@@ -64,12 +68,49 @@ export type statusType = {
   JPGHasThumbnail?: boolean;
 };
 
-//Subjects
-export type globalSubjectContainer = {
-  howManyFastImg: BehaviorSubject<number>;
-  smallRangeLoaded: Subject<boolean>;
-};
+export type collectedStatusType = {
+  //Map key is id
+  statusMap?: Map<number, elementStatusType>,
+  newElementRegistered: boolean,
+  updatedOrCreatedId: number,
+}
 
-export type globalObservableContainer = {
-  areAllSmallRangesLoaded: Observable<boolean>
+//Subjects
+export class globalContainer {
+
+  //Variables
+  private idCounter: number;
+
+  //Subjects
+  public statusInput: Subject<elementStatusType>;
+
+  //Observables
+  public $statusKeeper: Observable<collectedStatusType>;
+  public $newElement: Observable<elementStatusType>;
+
+  //Functions
+  public getUniqueID = () => {
+    this.idCounter++
+    return this.idCounter
+  }
+
+  constructor() {
+    //Variables
+    this.idCounter = -1;
+
+    //Subjects
+    this.statusInput = new Subject<elementStatusType>();
+
+    //Observables
+    this.$statusKeeper = this.statusInput.asObservable().pipe(
+      mergeWithExistingElementMap()
+    )
+    this.$newElement = this.$statusKeeper.pipe(
+      filter(val => val.newElementRegistered),
+      map(input => {
+        return input.statusMap[input.updatedOrCreatedId]
+      }),
+      share()
+    )
+  }
 };

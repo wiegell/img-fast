@@ -1,33 +1,24 @@
 // import { EventBusSetup, bus } from './lib/EventBusSetup';
 // import { EventBus } from "ts-bus";
 import { ImgFast } from "./lib/img-fast";
-import { globalObservableContainer, globalSubjectContainer } from "./lib/types";
-import { BehaviorSubject, Subject } from "rxjs";
+import { globalContainer, elementStatusType } from "./lib/types";
+import { BehaviorSubject, Subject, range } from "rxjs";
 import { sequenceEqual, map } from "rxjs/operators";
+import { mergeWithExistingElementMap } from './lib/stateKeeper'
 
 declare global {
-  interface Window {
-    imgFastGlobalSubjects: globalSubjectContainer;
-    imgFastGlobalObservables: globalObservableContainer;
-  }
+    interface Window {
+        imgFastGlobalContainer: globalContainer;
+    }
 }
+
 if (
-  window.imgFastGlobalSubjects !== undefined ||
-  window.imgFastGlobalObservables !== undefined
+    window.imgFastGlobalContainer !== undefined
 ) {
-  console.warn("imgFastGlobal already defined");
+    console.warn("imgFastGlobal already defined");
 } else {
-  console.log("Defining global behaviorSubject");
-  window.imgFastGlobalSubjects = {
-    howManyFastImg: new BehaviorSubject<number>(0),
-    smallRangeLoaded: new Subject<boolean>(),
-  };
-  window.imgFastGlobalObservables = {
-    areAllSmallRangesLoaded: window.imgFastGlobalSubjects.smallRangeLoaded.asObservable().pipe(
-      sequenceEqual(window.imgFastGlobalSubjects.howManyFastImg.asObservable(), )
-      map((inputArray) => true)
-    ),
-  };
+    console.log("Defining global behaviorSubject");
+    window.imgFastGlobalContainer = new globalContainer()
 }
 
 // export ImgFast?

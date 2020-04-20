@@ -1,6 +1,6 @@
 import { ExifParserFactory, ExifData } from "ts-exif-parser";
 import { ExifParser } from "ts-exif-parser/lib/ExifParser";
-import { configType, defaultConfig, isConfigType } from "./types";
+import { configType, defaultConfig, isConfigType, elementStatusType, dlStatusEnum } from "./types";
 import { Loader } from "./Loader";
 const css = "<style>" + require("../styles/main.css") + "</style>";
 const template: string = require("../templates/component.html");
@@ -9,8 +9,11 @@ export class ImgFast extends HTMLElement {
   // private parser: ExifParser | undefined;
   private data: ExifData | undefined;
   private parser: ExifParser | undefined;
-  private subj = window.imgFastGlobalSubjects;
-  private obs = window.imgFastGlobalObservables;
+  private glob = window.imgFastGlobalContainer;
+  private status: elementStatusType = {
+    id: this.glob.getUniqueID(),
+    dlStatus: dlStatusEnum.Stopped
+  }
 
   constructor() {
     super();
@@ -18,33 +21,40 @@ export class ImgFast extends HTMLElement {
     let shadowRoot = this.attachShadow({ mode: "open" });
 
     //Subscribe to global subject
-    this.obs.areSVGsRendered.subscribe((input) => {
-      console.log("yey! ");
-    });
+    // this.obs.areSVGsRendered.subscribe((input) => {
+    //   console.log("yey! ");
+    // });
 
     //Register this component
-    this.subj.howManyFastImg.next(this.subj.howManyFastImg.value + 1);
+    this.glob.$newElement.subscribe(() => {
+      console.log('Yay, new element!');
+    })
+    this.glob.statusInput.next(this.status)
+
 
     //setup configuration
-    let providedConfig: Partial<configType>;
-    try {
-      providedConfig = JSON.parse(this.children[0].innerHTML);
-      if (!isConfigType(providedConfig)) {
-        throw "config misconfigured";
+    {
+      let providedConfig: Partial<configType>;
+      try {
+        providedConfig = JSON.parse(this.children[0].innerHTML);
+        if (!isConfigType(providedConfig)) {
+          throw "config misconfigured";
+        }
+      } catch (ex) {
+        console.warn("No configuration stated, fallback to default: " + ex);
+        providedConfig = {};
       }
-    } catch (ex) {
-      console.warn("No configuration stated, fallback to default: " + ex);
-      providedConfig = {};
+      let currentConf: Required<configType> = {
+        ...defaultConfig,
+        ...providedConfig,
+      };
     }
-    let currentConf: Required<configType> = {
-      ...defaultConfig,
-      ...providedConfig,
-    };
+
 
     //Create svg-loaders
     let shadowTmpContainer = document.createElement("div");
     shadowRoot.innerHTML = css + template;
-    this.subj.SVGRender.next(true);
+    // this.subj.SVGRender.next(true);
 
     let loader = new Loader(this.src + "?" + Math.round(Math.random() * 100));
     //Process onload
