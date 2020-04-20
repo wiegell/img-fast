@@ -22,6 +22,7 @@ export class ImgFast extends HTMLElement {
     id: this.glob.getUniqueID(),
     dlStatus: dlStatusEnum.Stopped,
     isInViewport: false,
+    hasJustEnteredViewport: false
   };
   private downloadSubscription: Subscription;
 
@@ -91,6 +92,7 @@ export class ImgFast extends HTMLElement {
       let observer = new IntersectionWrapper();
       observer.$inViewport.subscribe((isInViewport) => {
         this.status.isInViewport = true;
+        this.status.hasJustEnteredViewport = true;
         this.glob.statusInput.next(this.status);
       });
       observer.IO.observe(this);

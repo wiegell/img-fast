@@ -1,110 +1,128 @@
 import { OperatorFunction, Subject, Observable, BehaviorSubject } from "rxjs";
-import { map, filter, share, bufferTime } from "rxjs/operators";
+import { map, filter, share, bufferTime, tap } from "rxjs/operators";
 import { elementStatusType, collectedStatusType, dlStatusEnum } from "./types";
 
 export function mergeWithExistingElementMap<T>(): OperatorFunction<
-  elementStatusType,
-  collectedStatusType
+    elementStatusType,
+    collectedStatusType
 > {
-  //Keys are id's
-  let operatorStatusMap: Map<number, elementStatusType>;
+    //Keys are id's
+    let operatorStatusMap: Map<number, elementStatusType>;
 
-  return map((inputStatus) => {
-    //Define default return
-    let collectedStatus: collectedStatusType = {
-      updatedOrCreatedId: inputStatus.id,
-      newElementRegistered: true,
-      newElementInViewport: false,
-    };
+    return map((inputStatus) => {
+        //Define default return
+        let collectedStatus: collectedStatusType = {
+            updatedOrCreatedId: inputStatus.id,
+            newElementRegistered: true,
+            newElementInViewport: false,
+        };
 
-    //Check if map is defined, and add id
-    if (operatorStatusMap !== undefined) {
-      //Iterate existing map for new properties
-      for (let [mapId, status] of operatorStatusMap.entries()) {
-        //Check if element is new
-        collectedStatus.newElementRegistered =
-          inputStatus.id === mapId
-            ? false
-            : collectedStatus.newElementRegistered;
+        //Default is new entry, false means update entry
+        let newEntry = true;
 
-        //Check if it has entered viewport
-        collectedStatus.newElementInViewport =
-          status.isInViewport !== inputStatus.isInViewport
-            ? true
-            : collectedStatus.newElementRegistered;
-        //Input status will always be the most updated value (cannot exit viewport)
-        status.isInViewport = inputStatus.isInViewport;
-      }
-    } else {
-      //Create operator map
-      operatorStatusMap = new Map();
-    }
+        //Check if map is defined, and add id
+        if (operatorStatusMap !== undefined) {
+            //Iterate existing map for new properties
+            for (let [mapId, status] of operatorStatusMap.entries()) {
 
-    //Add or replace values in map
-    operatorStatusMap.set(inputStatus.id, inputStatus);
+                //If the input statusid is already known, that means the 'status' defined in the 
+                //for-loop above is in fact by reference equal to the elements own status object
+                if (inputStatus.id === mapId) {
+                    //An already known id means, that we want to update values.
+                    newEntry = false;
 
-    //Add map to return object
-    collectedStatus.statusMap = operatorStatusMap;
+                    //Remove new
+                    collectedStatus.newElementRegistered = false
 
-    return collectedStatus;
-  });
+                    //Check if it has entered viewport
+                    if (status.hasJustEnteredViewport) {
+                        console.log('Entered viewport: ' + status.id);
+                        collectedStatus.newElementInViewport = true
+                        status.hasJustEnteredViewport = false
+                    }
+                }
+            }
+        } else {
+            //Create operator map
+            operatorStatusMap = new Map();
+        }
+
+        //Add reference in map, only if the id wasn't found in map
+        if (newEntry) {
+            operatorStatusMap.set(inputStatus.id, inputStatus);
+        }
+
+
+
+        //Add map to return object
+        collectedStatus.statusMap = operatorStatusMap;
+
+        return collectedStatus;
+    });
 }
 
 //Subjects
 export class globalContainer {
-  //Variables
-  private idCounter: number;
-
-  //Subjects
-  public statusInput: Subject<elementStatusType>;
-
-  //Observables
-  public $statusKeeper: Observable<collectedStatusType>;
-  public $newElement: Observable<elementStatusType | undefined>;
-  public $newInViewport: Observable<number[]>;
-  public $dlDictator: Observable<{ ids: number[]; dlCommand: dlStatusEnum }>;
-
-  //Functions
-  public getUniqueID = () => {
-    this.idCounter++;
-    return this.idCounter;
-  };
-
-  constructor() {
     //Variables
-    this.idCounter = -1;
+    private idCounter: number;
 
     //Subjects
-    this.statusInput = new Subject<elementStatusType>();
+    public statusInput: Subject<elementStatusType>;
 
     //Observables
-    this.$statusKeeper = this.statusInput
-      .asObservable()
-      .pipe(mergeWithExistingElementMap());
-    this.$newElement = this.$statusKeeper.pipe(
-      filter((val) => val.newElementRegistered),
-      map((input) => {
-        if (input.statusMap !== undefined) {
-          console.log("Shared?");
-          return input.statusMap.get(input.updatedOrCreatedId);
-        }
-      }),
-      share()
-    );
-    this.$newInViewport = this.$statusKeeper.pipe(
-      filter((val) => val.newElementInViewport),
-      map((input) => {
-        return input.updatedOrCreatedId;
-      }),
-      bufferTime(200),
-      map((input) => {
-        return input;
-      })
-    );
-    this.$dlDictator = this.$newInViewport.pipe(
-      map((input) => {
-        return { ids: input, dlCommand: dlStatusEnum.FetchFewKB };
-      })
-    );
-  }
+    public $statusKeeper: Observable<collectedStatusType>;
+    public $newElement: Observable<elementStatusType | undefined>;
+    public $newInViewport: Observable<number[]>;
+    public $dlDictator: Observable<{ ids: number[]; dlCommand: dlStatusEnum }>;
+
+    //Functions
+    public getUniqueID = () => {
+        this.idCounter++;
+        return this.idCounter;
+    };
+
+    constructor() {
+        //Variables
+        this.idCounter = -1;
+
+        //Subjects
+        this.statusInput = new Subject<elementStatusType>();
+
+        //Observables
+        this.$statusKeeper = this.statusInput
+            .asObservable()
+            .pipe(mergeWithExistingElementMap(), share());
+        this.$newElement = this.$statusKeeper.pipe(
+            filter((val) => val.newElementRegistered),
+            map((input) => {
+                if (input.statusMap !== undefined) {
+                    return input.statusMap.get(input.updatedOrCreatedId);
+                }
+            }),
+            share()
+        );
+        this.$newInViewport = this.$statusKeeper.pipe(
+            // tap(input => {
+            //     console.log('input tap:');
+            //     console.log(input)
+            // }),
+            filter((val) => val.newElementInViewport),
+
+            map((input) => {
+                return input.updatedOrCreatedId;
+            }),
+            bufferTime(200),
+            filter(val => val.length !== 0),
+            map((input) => {
+                return input;
+            }),
+            share()
+        );
+        this.$dlDictator = this.$newInViewport.pipe(
+
+            map((input) => {
+                return { ids: input, dlCommand: dlStatusEnum.FetchFewKB };
+            })
+        );
+    }
 }
