@@ -61,6 +61,7 @@ export enum fileType {
 
 export type elementStatusType = {
   id: number;
+  isInViewport?: boolean;
   dlStatus: dlStatusEnum;
   expectedFileType?: fileType;
   actualFileType?: fileType;

@@ -2,6 +2,7 @@ import { ExifParserFactory, ExifData } from "ts-exif-parser";
 import { ExifParser } from "ts-exif-parser/lib/ExifParser";
 import { configType, defaultConfig, isConfigType, elementStatusType, dlStatusEnum } from "./types";
 import { Loader } from "./Loader";
+import { IntersectionWrapper } from './intersection'
 const css = "<style>" + require("../styles/main.css") + "</style>";
 const template: string = require("../templates/component.html");
 
@@ -27,9 +28,25 @@ export class ImgFast extends HTMLElement {
 
     //Register this component
     this.glob.$newElement.subscribe(() => {
-      console.log('Yay, new element!');
+
     })
     this.glob.statusInput.next(this.status)
+
+    //Intersection start
+    if ('IntersectionObserver' in window) {
+      // IntersectionObserver Supported
+      let observer = new IntersectionWrapper();
+      observer.$inViewport.subscribe(isInViewport => {
+        this.status.isInViewport = true;
+        this.glob.statusInput.next(this.status)
+      })
+      observer.IO.observe(this)
+
+    } else {
+      // IntersectionObserver NOT Supported
+      console.error('Intersection observer not supported');
+    }
+    //Intersection end
 
 
     //setup configuration
