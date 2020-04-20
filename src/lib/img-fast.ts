@@ -1,15 +1,18 @@
 import { ExifParserFactory, ExifData } from "ts-exif-parser";
 import { ExifParser } from "ts-exif-parser/lib/ExifParser";
 import {
-  configType,
-  defaultConfig,
+  globalConfigType,
+  globalDefaultConfig,
   isConfigType,
   elementStatusType,
   dlStatusEnum,
+  elementConfigType,
 } from "./types";
 import { Loader } from "./Loader";
 import { IntersectionWrapper } from "./intersection";
 import { Subscription } from "rxjs";
+import { globalContainer } from "./stateKeeper";
+import { verboseLog } from "./helpers";
 const css = "<style>" + require("../styles/main.css") + "</style>";
 const template: string = require("../templates/component.html");
 
@@ -17,12 +20,12 @@ export class ImgFast extends HTMLElement {
   // private parser: ExifParser | undefined;
   private data: ExifData | undefined;
   private parser: ExifParser | undefined;
-  private glob = window.imgFastGlobalContainer;
+  private glob: globalContainer = window.imgFastGlobalContainer;
   private status: elementStatusType = {
     id: this.glob.getUniqueID(),
     dlStatus: dlStatusEnum.Stopped,
     isInViewport: false,
-    hasJustEnteredViewport: false
+    hasJustEnteredViewport: false,
   };
   private downloadSubscription: Subscription;
 
@@ -104,19 +107,21 @@ export class ImgFast extends HTMLElement {
 
     //setup configuration
     {
-      let providedConfig: Partial<configType>;
+      let providedElementConfig: Partial<elementConfigType>;
       try {
-        providedConfig = JSON.parse(this.children[0].innerHTML);
-        if (!isConfigType(providedConfig)) {
+        providedElementConfig = JSON.parse(this.children[0].innerHTML);
+        if (!isConfigType(providedElementConfig)) {
           throw "config misconfigured";
         }
       } catch (ex) {
-        console.warn("No configuration stated, fallback to default: " + ex);
-        providedConfig = {};
+        verboseLog("No configuration stated, fallback to default: " + ex, true);
+        providedElementConfig = {};
       }
-      let currentConf: Required<configType> = {
-        ...defaultConfig,
-        ...providedConfig,
+      //Base globalDefaultConfig, overwrite with possible given global configuration, then element configuration
+      let currentConf: globalConfigType = {
+        ...globalDefaultConfig,
+        ...this.glob.config,
+        ...providedElementConfig,
       };
     }
 

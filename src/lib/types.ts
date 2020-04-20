@@ -3,33 +3,71 @@ import { BehaviorSubject, Observable, Subject } from "rxjs";
 import { map, filter, publish, share } from "rxjs/operators";
 import { mergeWithExistingElementMap } from "./stateKeeper";
 
-export const defaultConfig = {
+//Config
+const elementDefaultConfig = {
   expectedJPG: true,
   expectedThumbnail: true,
   lulz: "test",
   lller: 3,
 };
 
-export type configType = typeof defaultConfig;
-type configFieldNames = keyof configType;
+export type elementConfigType = typeof elementDefaultConfig;
+export type globalConfigType = elementConfigType & {
+  priorities: Set<priorityEnum>;
+  logLevel: logLevelEnum;
+};
 
-//Type guards
+export enum logLevelEnum {
+  errors,
+  verbose,
+  none,
+}
+
+//Possible priorites
+export enum priorityEnum {
+  jpgExifInView,
+  jpgThumbnailInView,
+  jpgExifFullPage,
+  jpgCompleteInView,
+  pngsInView,
+  jpgThumbnailFullPage,
+  jpgCompleteFullPage,
+  pngsCompleteFullPage,
+}
+
+export const globalDefaultConfig: globalConfigType = {
+  ...elementDefaultConfig,
+  logLevel: logLevelEnum.verbose,
+  //Actual priorities
+  priorities: new Set<priorityEnum>()
+    .add(priorityEnum.jpgExifInView)
+    .add(priorityEnum.jpgThumbnailInView)
+    .add(priorityEnum.jpgExifFullPage)
+    .add(priorityEnum.jpgCompleteInView)
+    .add(priorityEnum.pngsInView)
+    .add(priorityEnum.jpgThumbnailFullPage)
+    .add(priorityEnum.jpgCompleteFullPage)
+    .add(priorityEnum.pngsCompleteFullPage),
+};
+
+//Config type guards
 
 export function isConfigType(
   providedConfig: any
-): providedConfig is Partial<configType> {
+): providedConfig is Partial<elementConfigType> {
   for (const key1 in providedConfig) {
     let keyExistsInprovidedConfig = false;
     let typeOfKeyIsCorrect = false;
-    for (let i = 0; i < Object.keys(defaultConfig).length; i++) {
+    for (let i = 0; i < Object.keys(elementDefaultConfig).length; i++) {
       // console.log('Keycomparison: ' + key1 + "//" + Object.keys(defaultConfig)[i]);
       // console.log('Valuecomparison: ' + typeof (providedConfig[key1]) + "//" + typeof Object.values(defaultConfig)[i]);
       keyExistsInprovidedConfig =
-        key1 == Object.keys(defaultConfig)[i]
+        key1 == Object.keys(elementDefaultConfig)[i]
           ? true
           : keyExistsInprovidedConfig;
       typeOfKeyIsCorrect =
-        typeof providedConfig[key1] == typeof Object.values(defaultConfig)[i]
+        typeof providedConfig[key1] ==
+        typeof Object.values(elementDefaultConfig)[i]
           ? true
           : typeOfKeyIsCorrect;
       // console.log('keyExistsInprovidedConfig: ' + keyExistsInprovidedConfig);
@@ -73,7 +111,7 @@ export type elementStatusType = {
 export type collectedStatusType = {
   updatedOrCreatedId: number;
   //Map key is id
-  statusMap?: Map<number, elementStatusType>;
+  statusMap: Map<number, elementStatusType>;
   newElementRegistered: boolean;
   newElementInViewport: boolean;
 };

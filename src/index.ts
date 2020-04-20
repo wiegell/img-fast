@@ -10,7 +10,11 @@ declare global {
 }
 
 if (window.imgFastGlobalContainer !== undefined) {
-  console.warn("imgFastGlobal already defined");
+  if (window.imgFastGlobalContainer.config == undefined) {
+    console.warn("imgFastGlobal already defined, but no config is set");
+  } else {
+    console.log("Global config is set (TODO: typeguard this config)");
+  }
 } else {
   console.log("Defining global behaviorSubject");
   window.imgFastGlobalContainer = new globalContainer();
