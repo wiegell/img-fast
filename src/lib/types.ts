@@ -1,7 +1,6 @@
 // export type Partial<configType> = { [P in keyof configType]?: configType[P] };
 import { BehaviorSubject, Observable, Subject } from "rxjs";
 import { map, filter, publish, share } from "rxjs/operators";
-import { mergeWithExistingElementMap } from "./stateKeeper";
 
 //Config
 const elementDefaultConfig = {
@@ -95,23 +94,40 @@ export enum fileType {
   png,
   gif,
   unsupported,
+  unknown,
 }
 
 export type elementStatusType = {
   id: number;
-  isInViewport: boolean;
-  hasJustEnteredViewport: boolean;
-  dlStatus: dlStatusEnum;
+  isInViewport?: boolean;
+  hasJustEnteredViewport?: boolean;
+  dlStatus?: dlStatusEnum;
   expectedFileType?: fileType;
   actualFileType?: fileType;
   JPGHasEXIF?: boolean;
   JPGHasThumbnail?: boolean;
 };
 
+export class elementStatusClass {
+  public id = -1;
+  public isInViewport = false;
+  public hasJustEnteredViewport = false;
+  public dlStatus = dlStatusEnum.Stopped;
+  public expectedFileType = fileType.unknown;
+  public actualFileType = fileType.unknown;
+  public JPGHasEXIF = false;
+  public JPGHasThumbnail = false;
+
+    constructor(opts: elementStatusType) {
+        Object.assign(this, opts);
+    }
+
+}
+
 export type collectedStatusType = {
   updatedOrCreatedId: number;
   //Map key is id
-  statusMap: Map<number, elementStatusType>;
+  // statusMap: Map<number, elementStatusType>;
   newElementRegistered: boolean;
   newElementInViewport: boolean;
 };

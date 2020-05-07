@@ -9,7 +9,6 @@ import {
   elementConfigType,
 } from "./types";
 import { Loader } from "./Loader";
-import { IntersectionWrapper } from "./intersection";
 import { Subscription } from "rxjs";
 import { globalContainer } from "./stateKeeper";
 import { verboseLog } from "./helpers";
@@ -21,12 +20,13 @@ export class ImgFast extends HTMLElement {
   private data: ExifData | undefined;
   private parser: ExifParser | undefined;
   private glob: globalContainer = window.imgFastGlobalContainer;
-  private status: elementStatusType = {
-    id: this.glob.getUniqueID(),
-    dlStatus: dlStatusEnum.Stopped,
-    isInViewport: false,
-    hasJustEnteredViewport: false,
-  };
+  private loaderId: number = this.glob.getUniqueID();
+  // private status: elementStatusType = {
+  //   id: this.glob.getUniqueID(),
+  //   dlStatus: dlStatusEnum.Stopped,
+  //   isInViewport: false,
+  //   hasJustEnteredViewport: false,
+  // };
   private downloadSubscription: Subscription;
 
   constructor() {
@@ -42,7 +42,7 @@ export class ImgFast extends HTMLElement {
     //Subscriptions
     this.downloadSubscription = this.glob.$dlDictator.subscribe((input) => {
       if (
-        input.ids.includes(this.status.id) &&
+        input.ids.includes(this.loaderId) &&
         input.dlCommand == dlStatusEnum.FetchFewKB
       ) {
         //HTTP-setup
@@ -84,26 +84,10 @@ export class ImgFast extends HTMLElement {
     });
 
     //Register this component
-    this.glob.$newElement.subscribe(() => {
+    this.glob.$elementRegistered.subscribe(() => {
       console.log("yay new element");
     });
-    this.glob.statusInput.next(this.status);
-
-    //Intersection start
-    if ("IntersectionObserver" in window) {
-      // IntersectionObserver Supported
-      let observer = new IntersectionWrapper();
-      observer.$inViewport.subscribe((isInViewport) => {
-        this.status.isInViewport = true;
-        this.status.hasJustEnteredViewport = true;
-        this.glob.statusInput.next(this.status);
-      });
-      observer.IO.observe(this);
-    } else {
-      // IntersectionObserver NOT Supported
-      console.error("Intersection observer not supported");
-    }
-    //Intersection end
+    this.glob.registerElement(this.loaderId);
 
     //setup configuration
     {
@@ -129,6 +113,9 @@ export class ImgFast extends HTMLElement {
     let shadowTmpContainer = document.createElement("div");
     shadowRoot.innerHTML = css + template;
     // this.subj.SVGRender.next(true);
+
+    //Intersection start
+    this.glob.observeViewportEnter(this.loaderId, this);
   }
 
   //Getters
