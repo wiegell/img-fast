@@ -2,12 +2,20 @@
 import { BehaviorSubject, Observable, Subject } from "rxjs";
 import { map, filter, publish, share } from "rxjs/operators";
 
+export enum fileType {
+  jpg,
+  png,
+  gif,
+  unsupported,
+  unknown,
+}
+
 //Config
 const elementDefaultConfig = {
-  expectedJPG: true,
+  expectedFileType: fileType.unknown,
   expectedThumbnail: true,
-  lulz: "test",
-  lller: 3,
+  //Ratio of height in pct. of width
+  expectedRatio: 0
 };
 
 export type elementConfigType = typeof elementDefaultConfig;
@@ -66,7 +74,7 @@ export function isConfigType(
           : keyExistsInprovidedConfig;
       typeOfKeyIsCorrect =
         typeof providedConfig[key1] ==
-        typeof Object.values(elementDefaultConfig)[i]
+          typeof Object.values(elementDefaultConfig)[i]
           ? true
           : typeOfKeyIsCorrect;
       // console.log('keyExistsInprovidedConfig: ' + keyExistsInprovidedConfig);
@@ -87,14 +95,6 @@ export enum dlStatusEnum {
   FetchFewKB,
   FetchMoreKB,
   FullDownload,
-}
-
-export enum fileType {
-  jpg,
-  png,
-  gif,
-  unsupported,
-  unknown,
 }
 
 export type elementStatusType = {
@@ -118,9 +118,9 @@ export class elementStatusClass {
   public JPGHasEXIF = false;
   public JPGHasThumbnail = false;
 
-    constructor(opts: elementStatusType) {
-        Object.assign(this, opts);
-    }
+  constructor(opts: elementStatusType) {
+    Object.assign(this, opts);
+  }
 
 }
 
@@ -131,3 +131,11 @@ export type collectedStatusType = {
   newElementRegistered: boolean;
   newElementInViewport: boolean;
 };
+
+export type parseReturn = {
+  imgURL: string,
+  x?: number,
+  y?: number,
+  ratio?: number,
+  parseFail: boolean
+}

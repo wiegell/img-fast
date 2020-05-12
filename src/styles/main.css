@@ -14,7 +14,7 @@ img {
 #ratio_keeper {
     height: 0;
     width: 100%;
-    padding: 122% 0 0 0;
+    padding: 0 0 0 0;
     background-color: rgba(100, 100, 100, 0.5);
     position: relative;
 }

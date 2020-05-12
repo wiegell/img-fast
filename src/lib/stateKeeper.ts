@@ -8,57 +8,6 @@ import {
 } from "./types";
 import { IntersectionWrapper } from "./intersection";
 
-// export function mergeWithExistingElementMap<T>(): OperatorFunction<
-//   elementStatusClass,
-//   collectedStatusType
-// > {
-//   //Keys are id's
-//   let operatorStatusMap: Map<number, elementStatusClass>;
-
-//   return map((inputStatus) => {
-//     //Define default return
-//     let collectedStatus: collectedStatusType = {
-//       updatedOrCreatedId: inputStatus.id,
-//       newElementRegistered: true,
-//       newElementInViewport: false,
-//       statusMap: operatorStatusMap,
-//     };
-
-//     //Default is new entry, false means update entry
-//     let newEntry = true;
-//     //Check if map is defined, and add id
-//     if (operatorStatusMap !== undefined) {
-//       //Iterate existing map for new properties
-//       for (let [mapId, status] of operatorStatusMap.entries()) {
-//         //If the input statusid is already known, that means the 'status' defined in the
-//         //for-loop above is in fact by reference equal to the elements own status object
-//         if (inputStatus.id === mapId) {
-//           //An already known id means, that we want to update values.
-//           newEntry = false;
-//           //Remove new
-//           collectedStatus.newElementRegistered = false;
-//           //Check if it has entered viewport
-//           if (status.hasJustEnteredViewport) {
-//             console.log("Entered viewport: " + status.id);
-//             collectedStatus.newElementInViewport = true;
-//             status.hasJustEnteredViewport = false;
-//           }
-//         }
-//       }
-//     } else {
-//       //Create operator map
-//       operatorStatusMap = new Map();
-//     }
-//     //Add reference in map, only if the id wasn't found in map
-//     if (newEntry) {
-//       operatorStatusMap.set(inputStatus.id, inputStatus);
-//     }
-//     //Add map to return object
-//     collectedStatus.statusMap = operatorStatusMap;
-//     return collectedStatus;
-//   });
-// }
-
 //Subjects
 export class globalContainer {
   //Variables
@@ -121,22 +70,15 @@ export class globalContainer {
     this.globalStatusMap = new Map();
 
     //Subjects
-    // this.statusInput = new Subject<elementStatusClass>();
+
     this.registerElementSubj = new Subject<{ id: number }>();
     this.hasEnteredViewport = new Subject<{ id: number }>();
 
     //Observables
-    // this.$statusKeeper = this.statusInput
-    //   .asObservable()
-    //   .pipe(mergeWithExistingElementMap(), share());
+
     this.$elementRegistered = this.registerElementSubj.asObservable().pipe(
       map((inputIdObj) => {
-        //Define default return
-        // let collectedStatus: collectedStatusType = {
-        //   updatedOrCreatedId: inputIdObj.id,
-        //   newElementRegistered: true,
-        //   newElementInViewport: false,
-        // };
+
 
         let returnObj = { id: inputIdObj.id, newElementRegistered: true };
 
@@ -147,14 +89,6 @@ export class globalContainer {
           if (inputIdObj.id === mapId) {
             //An already known id means, that we want to update values.
             returnObj.newElementRegistered = false;
-            //Remove new
-            // returnObj.newElementRegistered = false;
-            //Check if it has entered viewport
-            // if (status.hasJustEnteredViewport) {
-            //   console.log("Entered viewport: " + status.id);
-            //   returnObj.newElementInViewport = true;
-            //   status.hasJustEnteredViewport = false;
-            // }
           }
         }
 
@@ -168,23 +102,10 @@ export class globalContainer {
           console.log(statusMap);
         }
 
-        //Add map to return object
-        // collectedStatus.statusMap = operatorStatusMap;
-        // return collectedStatus;
-
         return returnObj;
       }),
       share()
     );
-    // this.$newElement = this.$statusKeeper.pipe(
-    //   filter((val) => val.newElementRegistered),
-    //   map((input) => {
-    //     if (input.statusMap !== undefined) {
-    //       return input.statusMap.get(input.updatedOrCreatedId);
-    //     }
-    //   }),
-    //   share()
-    // );
     this.$newInViewport = this.hasEnteredViewport.pipe(
       map((input) => {
         return input.id;

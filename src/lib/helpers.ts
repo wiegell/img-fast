@@ -1,4 +1,4 @@
-import { logLevelEnum, globalDefaultConfig } from "./types";
+import { logLevelEnum, globalDefaultConfig, fileType } from "./types";
 
 export function verboseLog(input: any, isWarn: boolean) {
   if (
@@ -20,5 +20,17 @@ export function errorLog(input: any) {
     window.imgFastGlobalContainer.config.logLevel !== logLevelEnum.none
   ) {
     console.log(input);
+  }
+}
+
+export function searchStrForFileType(str: string) {
+  if (str.search("jpg") != -1) {
+    return fileType.jpg
+  } else if (str.search("png") != -1) {
+    return fileType.png
+  } else if (str.search("gif") != -1) {
+    return fileType.gif
+  } else {
+    return fileType.unknown
   }
 }

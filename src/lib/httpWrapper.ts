@@ -1,7 +1,7 @@
 import { ExifData } from 'ts-exif-parser';
 
 
-export class Loader {
+export class httpLoader {
     private xhr = new XMLHttpRequest;
 
     private data: ExifData | undefined;
@@ -13,7 +13,6 @@ export class Loader {
         this.src = src;
         this.HTTPProm = new Promise((resolve: (AB: Buffer) => void, reject: (Err: Error) => void) => {
             this.xhr.open('GET', this.src, true);
-            this.xhr.setRequestHeader('Range', 'bytes=0-15000'); // the bytes (incl.) you request
             this.xhr.responseType = "arraybuffer";
             this.xhr.onload = () => {
                 if (this.xhr.status === 200 || this.xhr.status === 206) {
@@ -35,6 +34,10 @@ export class Loader {
         })
 
 
+    }
+
+    public setRequestRange(range: string) {
+        this.xhr.setRequestHeader('Range', 'bytes=' + range); // the bytes (incl.) you request
     }
 
     public getHTTPonLoadPromise(): Promise<ArrayBuffer> {

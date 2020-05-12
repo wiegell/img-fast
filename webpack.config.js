@@ -33,7 +33,8 @@ module.exports = {
   devtool: "source-map",
   devServer: {
     contentBase: path.join(__dirname, "dist"),
-    compress: false,
+    compress: true,
+    host: '0.0.0.0',
     port: 8080,
   },
   optimization: {
