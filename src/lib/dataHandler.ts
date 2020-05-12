@@ -2,7 +2,7 @@ import { ExifParserFactory, ExifData } from "ts-exif-parser";
 import { ExifParser } from "ts-exif-parser/lib/ExifParser";
 import { fileType, parseReturn, dlStatusEnum } from "./types"
 import { verboseLog } from "./helpers"
-import { set100Height, setPaddingRatio } from "./domWrapper"
+import { set100Height, setPaddingRatio, change } from "./domWrapper"
 
 export class dataHandler2 {
   private data: ExifData | undefined;
@@ -61,6 +61,7 @@ export class dataHandler2 {
     }
   }
 
+  // Returns the created element
   httpResultHandler(loadLvl: dlStatusEnum, result, SR: ShadowRoot, DH: dataHandler2) {
     //Append thumbnail if found in exif (else imgURL is just empty)
     let ratioEl = SR.getElementById("ratio_keeper")
@@ -81,8 +82,7 @@ export class dataHandler2 {
           this.intrinsicRatio = img.height / img.width;
           setPaddingRatio(ratioEl, this.intrinsicRatio)
           imgLoaded = parseRes.imgURL == undefined ? false : true;
-          img.style.visibility = "initial"
-          ratioEl.removeChild(SR.getElementById("svgContainer"))
+          change({ fromInvis: true, toBlur: true, fade: true, fadeTime: 300 }, ratioEl, img, SR.getElementById("svgContainer"))
         }
         img.style.visibility = "hidden"
         ratioEl.appendChild(img);
@@ -101,8 +101,7 @@ export class dataHandler2 {
       if (!parseRes.parseFail) {
         if (parseRes.imgURL != undefined) {
           //Check if image data has actually been parsed
-          ratioEl.appendChild(img);
-          ratioEl.removeChild(SR.getElementById("svgContainer"))
+          change({ fromInvis: false, toBlur: true, fade: true, fadeTime: 500 }, ratioEl, img, SR.getElementById("svgContainer"))
         }
       } else {
         verboseLog("Parse fail, fetchFewKB: " + this.src, true)

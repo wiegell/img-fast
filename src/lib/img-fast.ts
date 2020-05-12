@@ -95,8 +95,6 @@ export class ImgFast extends HTMLElement {
     });
     this.glob.registerElement(this.loaderId);
 
-
-
     //Intersection start
     this.glob.observeViewportEnter(this.loaderId, this);
   }

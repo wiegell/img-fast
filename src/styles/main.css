@@ -17,6 +17,7 @@ img {
     padding: 0 0 0 0;
     background-color: rgba(100, 100, 100, 0.5);
     position: relative;
+    overflow: hidden;
 }
 
 #svgContainer {
