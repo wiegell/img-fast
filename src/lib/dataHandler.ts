@@ -1,13 +1,14 @@
 import { ExifParserFactory, ExifData } from "ts-exif-parser";
 import { ExifParser } from "ts-exif-parser/lib/ExifParser";
 import { fileType, parseReturn, dlStatusEnum } from "./types"
-import { verboseLog } from "./helpers"
+import { verboseLog, QPromise, MakeQuerablePromise } from "./helpers"
 import { set100Height, setPaddingRatio, change } from "./domWrapper"
 
 export class dataHandler2 {
   private data: ExifData | undefined;
   private parser: ExifParser | undefined;
   private thumbnailArBu: ArrayBuffer;
+  public DOMUpdatePromiseQueu: QPromise<boolean>[] = new Array(0)
 
   constructor(public intrinsicRatio: number, private expectFT: fileType = fileType.jpg, private src: string) {
   }
@@ -82,9 +83,25 @@ export class dataHandler2 {
           this.intrinsicRatio = img.height / img.width;
           setPaddingRatio(ratioEl, this.intrinsicRatio)
           imgLoaded = parseRes.imgURL == undefined ? false : true;
-          change({ fromInvis: true, toBlur: true, fade: true, fadeTime: 300 }, ratioEl, img, SR.getElementById("svgContainer"))
+          this.DOMUpdatePromiseQueu.push(
+            MakeQuerablePromise(
+              change({ fromInvis: true, toBlur: true, fade: true, fadeTime: 300 }, ratioEl, img, SR.getElementById("svgContainer"))
+            )
+          )
+
+          //Tmp test to remove blur
+          let img2 = document.createElement("img")
+          if (parseRes.imgURL != undefined) {
+            //Check if image data has actually been parsed and add to img obj.
+            img2.src = parseRes.imgURL
+          }
+          console.log('Then defined: ' + this.src);
+          this.DOMUpdatePromiseQueu[0].then(() => {
+            console.log('Promise resolved: ' + this.src);
+            change({ fromInvis: false, toBlur: false, fade: true, fadeTime: 500 }, ratioEl, img2, img)
+          })
         }
-        img.style.visibility = "hidden"
+        img.style.opacity = "0"
         ratioEl.appendChild(img);
         setTimeout(() => {
           if (!imgLoaded) {
