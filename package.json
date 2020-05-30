@@ -1,8 +1,10 @@
 {
   "name": "img-fast",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "non-REST loader",
   "main": "dist/index",
+  "type": "module",
+  "module": "dist/index",
   "types": "dist/index.d.ts",
   "scripts": {
     "type-check": "tsc --noEmit",
@@ -10,7 +12,8 @@
     "build": "tsc && webpack",
     "build:types": "tsc",
     "build:js": "webpack",
-    "start:dev": "webpack-dev-server"
+    "start:dev": "webpack-dev-server",
+    "prepublish": "tsc"
   },
   "repository": {
     "type": "git",
@@ -39,6 +42,6 @@
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.10.3"
-  },
-  "type": "commonjs"
+  }
+  
 }
