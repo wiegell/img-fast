@@ -1,6 +1,6 @@
 {
   "name": "img-fast",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "non-REST loader",
   "main": "dist/index",
   "type": "module",
