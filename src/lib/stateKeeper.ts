@@ -119,8 +119,10 @@ export class globalContainer {
     );
     this.$dlDictator = this.$newInViewport.pipe(
       map((input) => {
+        console.log('DL-dict, test: ' + input);
         return { ids: input, dlCommand: dlStatusEnum.FetchFewKB };
-      })
+      }),
+      share()
     );
   }
 }
