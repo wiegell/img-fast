@@ -1,9 +1,9 @@
 {
   "name": "img-fast",
-  "version": "0.1.5ä",
+  "version": "0.1.6",
   "description": "non-REST loader",
   "main": "dist/index",
-  "type": "module",
+  "type": "commonJS",
   "module": "dist/index",
   "types": "dist/index.d.ts",
   "scripts": {
