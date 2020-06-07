@@ -8,7 +8,10 @@ img-fast is a framwork-agnostic typescript ES6 web component meant to load image
 * Prioritize full size downloads with intersection-observer (lazy load)
 * Where possible load the EXIF-thumbnail of jpeg's as placeholder
 * Support multiple server side resolutions (to rerender higher quality stepwise)
+* Public hooks (observables) to react to stages of image loads (e.g. start some other AJAX-request after lo-res has loaded)
 
-So far the only dependencies are ts-exif-parser and ts-bus
+So far the only dependencies are ts-exif-parser and rxjs
 
-Head back for examples soon!
+## Example page
+(work in progress)
+[https://wiegell.github.io/img-fast/](https://wiegell.github.io/img-fast/)
